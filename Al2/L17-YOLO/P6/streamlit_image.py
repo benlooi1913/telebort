@@ -40,7 +40,16 @@ if uploaded_file is not None:
                     conf = math.ceil((box.conf[0]*100))/100
                     cls = int(box.cls[0])
                     label = f'{class_names[cls]} {conf}'
+
+                    # Map class names to Rock, Paper, Scissors
+                    if class_names[cls].lower() == "rock":
+                        label = f"Rock {conf}"
+                    elif class_names[cls].lower() == "paper":
+                        label = f"Paper {conf}"
+                    elif class_names[cls].lower() == "scissors":
+                        label = f"Scissors {conf}"
+
                     cv2.putText(img, label, (int(x1), int(y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
             # Convert BGR to RGB for display
-            st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="Detected Image", use_column_width=True)
+            st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="Detected Image", use_container_width=True)
