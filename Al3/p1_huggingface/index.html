@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vision Camera - AI Powered</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Smart Vision Camera</h1>
+            <p class="subtitle">AI-Powered Real-Time Vision Analysis</p>
+        </header>
+
+        <main>
+            <!-- Camera Preview Section -->
+            <section class="camera-section">
+                <div class="video-container">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <canvas id="canvasElement" style="display: none;"></canvas>
+                    <div id="loadingOverlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>Loading AI Model...</p>
+                        <p class="small-text">This may take a few minutes on first load</p>
+                    </div>
+                </div>
+                <div class="camera-status">
+                    <span id="statusIndicator" class="status-dot inactive"></span>
+                    <span id="statusText">Initializing...</span>
+                </div>
+            </section>
+
+            <!-- Control Section -->
+            <section class="control-section">
+                <div class="instruction-input">
+                    <label for="instructionText">Ask the AI:</label>
+                    <input
+                        type="text"
+                        id="instructionText"
+                        placeholder="What do you see in this image?"
+                        value="Describe what you see in detail"
+                    >
+                </div>
+                <div class="button-group">
+                    <button id="startButton" class="btn btn-primary" disabled>
+                        <span class="btn-icon">▶</span> Start Analysis
+                    </button>
+                    <button id="stopButton" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">⏸</span> Stop
+                    </button>
+                </div>
+            </section>
+
+            <!-- Response Section -->
+            <section class="response-section">
+                <h2>AI Response</h2>
+                <div id="responseArea" class="response-area">
+                    <p class="placeholder-text">AI responses will appear here once you start the analysis...</p>
+                </div>
+                <div id="processingIndicator" class="processing-indicator" style="display: none;">
+                    <div class="processing-spinner"></div>
+                    <span>Processing image...</span>
+                </div>
+            </section>
+
+            <!-- Info Section -->
+            <section class="info-section">
+                <details>
+                    <summary>ℹ️ How to Use</summary>
+                    <ol>
+                        <li>Allow camera access when prompted</li>
+                        <li>Wait for "Ready to start" message</li>
+                        <li>Optionally modify the instruction prompt</li>
+                        <li>Click "Start Analysis" to begin</li>
+                        <li>AI will analyze your camera feed every few seconds</li>
+                        <li>Click "Stop" to pause analysis</li>
+                    </ol>
+                </details>
+                <details>
+                    <summary>⚙️ Technical Info</summary>
+                    <ul>
+                        <li><strong>Model:</strong> SmolVLM-500M-Instruct (Hugging Face)</li>
+                        <li><strong>Processing:</strong> Client-side (your browser)</li>
+                        <li><strong>Privacy:</strong> No data sent to servers</li>
+                        <li><strong>Requirements:</strong> WebGPU-enabled browser</li>
+                    </ul>
+                </details>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with ❤️ using Transformers.js | All processing happens in your browser</p>
+            <p class="small-text">⚠️ Educational project - AI may make mistakes</p>
+        </footer>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
