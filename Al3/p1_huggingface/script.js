@@ -6,7 +6,7 @@
  * There are 4 main areas you need to complete
  */
 
-import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2";
+import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest";
 
 // Configure environment
 env.allowLocalModels = false;
@@ -54,7 +54,7 @@ async function initializeModel() {
         updateStatus('Loading AI model...', false);
 
         // TODO 1: Replace ______ with the correct model ID
-        const modelId = "______";
+        const modelId = "HuggingFaceTB/SmolVLM-500M-Instruct";
 
         console.log('Loading model:', modelId);
         model = await pipeline("image-to-text", modelId, {
@@ -91,7 +91,7 @@ async function initializeCamera() {
         updateStatus('Requesting camera access...', false);
 
         // TODO 2: Replace ______ with the correct method name
-        stream = await navigator.mediaDevices.______({
+        stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
                 width: { ideal: 1280 },
@@ -156,7 +156,7 @@ async function processFrame() {
                 // HINT: model expects (image, {prompt: "your instruction"})
                 const result = await model(blob, {
                     prompt: instruction,
-                    max_new_tokens: ______, // TODO: Set to 100 for reasonable response length
+                    max_new_tokens: 100, // TODO: Set to 100 for reasonable response length
                 });
 
                 // Display response
@@ -198,7 +198,7 @@ function startProcessing() {
     }
 
     // TODO 4a: Set isProcessing to ______
-    isProcessing = ______;
+    isProcessing = true;
 
     startBtn.disabled = true;
     stopBtn.disabled = false;
@@ -213,7 +213,7 @@ function startProcessing() {
 
 function stopProcessing() {
     // TODO 4b: Set isProcessing to ______
-    isProcessing = ______;
+    isProcessing = false;
 
     if (processingInterval) {
         clearInterval(processingInterval);
@@ -294,10 +294,10 @@ window.addEventListener('beforeunload', cleanup);
     console.log('Starting Smart Vision Camera...');
 
     // TODO 5a: Initialize model first
-    await ______();
+    await initializeModel();
 
     // TODO 5b: Initialize camera second
-    await ______();
+    await initializeCamera();
 
     console.log('Initialization complete!');
 })();
