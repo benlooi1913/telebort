@@ -54,7 +54,7 @@ async function initializeModel() {
         updateStatus('Loading AI model...', false);
 
         // TODO 1: Replace ______ with the correct model ID
-        const modelId = "HuggingFaceTB/SmolVLM-500M-Instruct";
+        const modelId = "HuggingFaceTB/SmolVLM-256M-Instruct";
 
         console.log('Loading model:', modelId);
         model = await pipeline("image-to-text", modelId, {
