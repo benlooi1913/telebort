@@ -14,79 +14,118 @@
         </header>
 
         <main>
-            <!-- Camera Preview Section -->
-            <section class="camera-section">
-                <div class="video-container">
-                    <video id="videoElement" autoplay playsinline></video>
-                    <canvas id="canvasElement" style="display: none;"></canvas>
-                    <div id="loadingOverlay" class="loading-overlay">
-                        <div class="spinner"></div>
-                        <p>Loading AI Model...</p>
-                        <p class="small-text">This may take a few minutes on first load</p>
+            <div class="main-content">
+                <!-- Camera Preview Section -->
+                <section class="camera-section">
+                    <div class="video-container">
+                        <video id="videoElement" autoplay playsinline></video>
+                        <canvas id="canvasElement" style="display: none;"></canvas>
+                        <div id="loadingOverlay" class="loading-overlay">
+                            <div class="spinner"></div>
+                            <p>Loading AI Model...</p>
+                            <p class="small-text">This may take a few minutes on first load</p>
+                        </div>
                     </div>
-                </div>
-                <div class="camera-status">
-                    <span id="statusIndicator" class="status-dot inactive"></span>
-                    <span id="statusText">Initializing...</span>
-                </div>
-            </section>
+                    <div class="camera-status">
+                        <span id="statusIndicator" class="status-dot inactive"></span>
+                        <span id="statusText">Initializing...</span>
+                    </div>
+                </section>
 
-            <!-- Control Section -->
-            <section class="control-section">
-                <div class="instruction-input">
-                    <label for="instructionText">Ask the AI:</label>
-                    <input
-                        type="text"
-                        id="instructionText"
-                        placeholder="What do you see in this image?"
-                        value="Describe what you see in detail"
-                    >
-                </div>
-                <div class="button-group">
-                    <button id="startButton" class="btn btn-primary" disabled>
-                        <span class="btn-icon">▶</span> Start Analysis
-                    </button>
-                    <button id="stopButton" class="btn btn-secondary" disabled>
-                        <span class="btn-icon">⏸</span> Stop
-                    </button>
-                </div>
-            </section>
+                <!-- Control Section -->
+                <section class="control-section">
+                    <div class="instruction-input">
+                        <label for="instructionText">Ask the AI:</label>
+                        <input
+                            type="text"
+                            id="instructionText"
+                            placeholder="What do you see in this image?"
+                            value="Describe what you see in detail"
+                        >
+                    </div>
 
-            <!-- Response Section -->
-            <section class="response-section">
-                <h2>AI Response</h2>
-                <div id="responseArea" class="response-area">
-                    <p class="placeholder-text">AI responses will appear here once you start the analysis...</p>
-                </div>
-                <div id="processingIndicator" class="processing-indicator" style="display: none;">
-                    <div class="processing-spinner"></div>
-                    <span>Processing image...</span>
-                </div>
-            </section>
+                    <!-- Challenge 1: Preset Prompt Buttons -->
+                    <div class="preset-prompts">
+                        <label>Quick Prompts:</label>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-prompt="What colors do you see?">🎨 Colors</button>
+                            <button class="preset-btn" data-prompt="How many objects are visible?">🔢 Objects</button>
+                            <button class="preset-btn" data-prompt="Describe the lighting">💡 Lighting</button>
+                        </div>
+                    </div>
 
-            <!-- Info Section -->
-            <section class="info-section">
-                <details>
-                    <summary>ℹ️ How to Use</summary>
-                    <ol>
-                        <li>Allow camera access when prompted</li>
-                        <li>Wait for "Ready to start" message</li>
-                        <li>Optionally modify the instruction prompt</li>
-                        <li>Click "Start Analysis" to begin</li>
-                        <li>AI will analyze your camera feed every few seconds</li>
-                        <li>Click "Stop" to pause analysis</li>
-                    </ol>
-                </details>
-                <details>
-                    <summary>⚙️ Technical Info</summary>
-                    <ul>
-                        <li><strong>Model:</strong> SmolVLM-500M-Instruct (Hugging Face)</li>
-                        <li><strong>Processing:</strong> Client-side (your browser)</li>
-                        <li><strong>Privacy:</strong> No data sent to servers</li>
-                        <li><strong>Requirements:</strong> WebGPU-enabled browser</li>
-                    </ul>
-                </details>
-            </section>
+                    <div class="button-group">
+                        <button id="startButton" class="btn btn-primary" disabled>
+                            <span class="btn-icon">▶</span> Start Analysis
+                        </button>
+                        <button id="stopButton" class="btn btn-secondary" disabled>
+                            <span class="btn-icon">⏸</span> Stop
+                        </button>
+                        <!-- Challenge 3: Capture Button -->
+                        <button id="captureButton" class="btn btn-capture">
+                            <span class="btn-icon">📸</span> Capture
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Response Section -->
+                <section class="response-section">
+                    <h2>AI Response</h2>
+                    <div id="responseArea" class="response-area">
+                        <p class="placeholder-text">AI responses will appear here once you start the analysis...</p>
+                    </div>
+                    <div id="processingIndicator" class="processing-indicator" style="display: none;">
+                        <div class="processing-spinner"></div>
+                        <span>Processing image...</span>
+                    </div>
+                    <!-- Challenge 4: Confidence Score Display -->
+                    <div id="confidenceSection" class="confidence-section" style="display: none;">
+                        <div class="confidence-label">
+                            <span>AI Confidence</span>
+                            <span id="confidenceScore" class="confidence-value">-</span>
+                        </div>
+                        <div class="confidence-bar-container">
+                            <div id="confidenceBar" class="confidence-bar"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Info Section -->
+                <section class="info-section">
+                    <details>
+                        <summary>ℹ️ How to Use</summary>
+                        <ol>
+                            <li>Allow camera access when prompted</li>
+                            <li>Wait for "Ready to start" message</li>
+                            <li>Type a question or pick a Quick Prompt</li>
+                            <li>Click "Start Analysis" to begin</li>
+                            <li>AI will analyze your camera feed every few seconds</li>
+                            <li>Click "Stop" to pause analysis</li>
+                            <li>Click "Capture" to save the current frame as PNG</li>
+                        </ol>
+                    </details>
+                    <details>
+                        <summary>⚙️ Technical Info</summary>
+                        <ul>
+                            <li><strong>Model:</strong> SmolVLM-256M-Instruct (Hugging Face)</li>
+                            <li><strong>Processing:</strong> Client-side (your browser)</li>
+                            <li><strong>Privacy:</strong> No data sent to servers</li>
+                            <li><strong>Requirements:</strong> WebGPU-enabled browser</li>
+                        </ul>
+                    </details>
+                </section>
+            </div>
+
+            <!-- Challenge 2: Response History Sidebar -->
+            <aside class="history-sidebar">
+                <h2>Response History</h2>
+                <div id="historyList" class="history-list">
+                    <p class="history-empty">No responses yet</p>
+                </div>
+                <button id="clearHistoryBtn" class="btn btn-secondary" style="margin-top: 15px; width: 100%;">
+                    🗑️ Clear History
+                </button>
+            </aside>
         </main>
 
         <footer>

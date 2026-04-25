@@ -26,6 +26,14 @@ const statusText = document.getElementById('statusText');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const processingIndicator = document.getElementById('processingIndicator');
 
+// Challenge DOM Elements
+const captureBtn = document.getElementById('captureButton');
+const historyList = document.getElementById('historyList');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const confidenceSection = document.getElementById('confidenceSection');
+const confidenceBar = document.getElementById('confidenceBar');
+const confidenceScoreEl = document.getElementById('confidenceScore');
+
 // ============================================================================
 // Global State
 // ============================================================================
@@ -34,6 +42,10 @@ let stream = null;
 let isProcessing = false;
 let processingInterval = null;
 const PROCESSING_DELAY = 3000; // Process every 3 seconds
+
+// Challenge 2: Response history state
+const responseHistory = [];
+const MAX_HISTORY = 10;
 
 // ============================================================================
 // TODO 1: Model Initialization (MEDIUM DIFFICULTY)
@@ -152,15 +164,25 @@ async function processFrame() {
                 // TODO 3c: Get the instruction from the input field
                 const instruction = instructionText.value || "Describe what you see";
 
+                // Challenge 4: Append confidence score request to the prompt
+                const enhancedInstruction = instruction +
+                    ' At the end of your response, write "Confidence: X/10" where X is your confidence level from 1 to 10.';
+
                 // TODO 3d: Send to AI model
-                // HINT: model expects (image, {prompt: "your instruction"})
                 const result = await model(blob, {
-                    prompt: instruction,
-                    max_new_tokens: 100, // TODO: Set to 100 for reasonable response length
+                    prompt: enhancedInstruction,
+                    max_new_tokens: 120,
                 });
 
-                // Display response
-                displayResponse(result[0].generated_text);
+                const fullText = result[0].generated_text;
+
+                // Challenge 4: Extract confidence score and strip it from displayed text
+                const confidence = extractConfidence(fullText);
+                const displayText = fullText.replace(/confidence:\s*\d+\s*\/\s*10\.?/gi, '').trim();
+
+                // Display response and confidence
+                displayResponse(displayText);
+                displayConfidence(confidence);
 
             } catch (error) {
                 console.error('Error processing image:', error);
@@ -249,6 +271,9 @@ function displayResponse(text) {
     // Append to response area
     responseArea.appendChild(responsePara);
     responseArea.appendChild(instructionPara);
+
+    // Challenge 2: Save to history
+    addToHistory(text, instructionText.value);
 }
 
 function updateStatus(message, isActive) {
@@ -266,10 +291,111 @@ function cleanup() {
 }
 
 // ============================================================================
+// Challenge 1: Preset Prompt Buttons
+// ============================================================================
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        instructionText.value = btn.dataset.prompt;
+        instructionText.focus();
+    });
+});
+
+// ============================================================================
+// Challenge 2: Response History
+// ============================================================================
+function addToHistory(response, instruction) {
+    responseHistory.unshift({ response, instruction, timestamp: new Date().toLocaleTimeString() });
+    if (responseHistory.length > MAX_HISTORY) {
+        responseHistory.pop();
+    }
+    renderHistory();
+}
+
+function renderHistory() {
+    if (responseHistory.length === 0) {
+        historyList.innerHTML = '<p class="history-empty">No responses yet</p>';
+        return;
+    }
+    historyList.innerHTML = responseHistory.map(entry => {
+        const shortInstruction = entry.instruction.length > 35
+            ? entry.instruction.substring(0, 35) + '\u2026'
+            : entry.instruction;
+        const shortResponse = entry.response.length > 100
+            ? entry.response.substring(0, 100) + '\u2026'
+            : entry.response;
+        return `<div class="history-item">
+            <div class="history-meta">
+                <span class="history-time">${entry.timestamp}</span>
+                <span class="history-instruction">${shortInstruction}</span>
+            </div>
+            <p class="history-response">${shortResponse}</p>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================================
+// Challenge 3: Image Capture
+// ============================================================================
+function captureFrame() {
+    if (!video.videoWidth) {
+        alert('No video feed available. Start the camera first.');
+        return;
+    }
+    const captureCanvas = document.createElement('canvas');
+    captureCanvas.width = video.videoWidth;
+    captureCanvas.height = video.videoHeight;
+    captureCanvas.getContext('2d').drawImage(video, 0, 0);
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    const lastResponse = responseHistory[0];
+    const slug = lastResponse
+        ? lastResponse.response.slice(0, 25).replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '-')
+        : 'frame';
+
+    const link = document.createElement('a');
+    link.download = `capture-${timestamp}-${slug}.png`;
+    link.href = captureCanvas.toDataURL('image/png');
+    link.click();
+}
+
+// ============================================================================
+// Challenge 4: Confidence Score
+// ============================================================================
+function extractConfidence(text) {
+    const match = text.match(/confidence:\s*(\d+)\s*\/\s*10/i);
+    if (!match) return null;
+    return Math.min(10, Math.max(1, parseInt(match[1], 10)));
+}
+
+function displayConfidence(score) {
+    confidenceSection.style.display = 'block';
+    if (score === null) {
+        confidenceScoreEl.textContent = 'N/A';
+        confidenceBar.style.width = '0%';
+        confidenceBar.style.background = 'var(--secondary-color)';
+        return;
+    }
+    confidenceScoreEl.textContent = score + '/10';
+    confidenceBar.style.width = (score * 10) + '%';
+    if (score <= 3) {
+        confidenceBar.style.background = 'var(--danger-color)';
+    } else if (score <= 6) {
+        confidenceBar.style.background = '#f59e0b';
+    } else {
+        confidenceBar.style.background = 'var(--success-color)';
+    }
+}
+
+// ============================================================================
 // Event Listeners
 // ============================================================================
 startBtn.addEventListener('click', startProcessing);
 stopBtn.addEventListener('click', stopProcessing);
+captureBtn.addEventListener('click', captureFrame);
+clearHistoryBtn.addEventListener('click', () => {
+    responseHistory.length = 0;
+    renderHistory();
+});
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', cleanup);
