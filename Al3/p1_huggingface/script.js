@@ -42,6 +42,8 @@ let stream = null;
 let isProcessing = false;
 let processingInterval = null;
 const PROCESSING_DELAY = 3000; // Process every 3 seconds
+let isModelReady = false;
+let isCameraReady = false;
 
 // Challenge 2: Response history state
 const responseHistory = [];
@@ -66,22 +68,76 @@ async function initializeModel() {
         updateStatus('Loading AI model...', false);
 
         // TODO 1: Replace ______ with the correct model ID
+        // Using 256M model - optimized for speed on slow connections
         const modelId = "HuggingFaceTB/SmolVLM-256M-Instruct";
 
         console.log('Loading model:', modelId);
-        model = await pipeline("image-to-text", modelId, {
-            device: "webgpu", // Use GPU acceleration
+        console.log('⏳ On slow internet: This may take 3-5 minutes first load, then cached...');
+        console.log('💡 Tip: Keep this tab open while loading, close other apps for better speed');
+        
+        // Set timeout to detect if loading is stuck
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Model loading timeout - check internet connection')), 5 * 60 * 1000)
+        );
+
+        let lastProgressTime = Date.now();
+        let lastStatus = '';
+        let lastLoggedPercent = null;
+        
+        const loadPromise = pipeline("image-to-text", modelId, {
+            device: "auto", // Auto-detect: WebGPU, then CPU
+            progress_callback: (progress) => {
+                lastProgressTime = Date.now();
+                const status = progress.status;
+                const percent = Math.round((progress.progress || 0) * 100);
+
+                if (status === 'downloading' || status === 'progress_total') {
+                    if (percent !== lastLoggedPercent || status !== lastStatus) {
+                        lastLoggedPercent = percent;
+                        lastStatus = status;
+                        const message = `Downloading model... ${percent}%`;
+                        console.log(`📥 ${message}`);
+                        updateStatus(message, false);
+                    }
+                } else if (status === 'progress') {
+                    if (lastStatus !== 'progress') {
+                        lastStatus = 'progress';
+                        const message = 'Processing model...';
+                        console.log(`⚙️ ${message}`);
+                        updateStatus(message, false);
+                    }
+                } else if (status === 'done') {
+                    lastStatus = 'done';
+                    const message = 'Model download complete. Finalizing startup...';
+                    console.log(`✅ ${message}`);
+                    updateStatus(message, false);
+                }
+            }
         });
 
-        console.log('Model loaded successfully!');
-        updateStatus('Ready to start', true);
-        startBtn.disabled = false;
-        loadingOverlay.classList.add('hidden');
+        model = await Promise.race([loadPromise, timeoutPromise]);
+        isModelReady = true;
+
+        console.log('✅ Model loaded successfully!');
+        console.log('📦 Model cached in browser - next reload will be instant!');
+        updateStatus('Model loaded. Waiting for camera...', false);
+        finalizeInitialization();
 
     } catch (error) {
-        console.error('Error loading model:', error);
-        updateStatus('Error loading model: ' + error.message, false);
-        alert('Failed to load AI model. Check console for details.');
+        console.error('❌ Error loading model:', error);
+        console.error('Error details:', error.message);
+        
+        // Provide helpful debugging info
+        if (error.message.includes('timeout')) {
+            updateStatus('Loading timeout - check internet connection', false);
+            alert('Model loading took too long. Check your internet connection and try refreshing the page.');
+        } else if (error.message.includes('CORS') || error.message.includes('network')) {
+            updateStatus('Network error - check internet connection', false);
+            alert('Network error loading model. Check your internet connection and try again.');
+        } else {
+            updateStatus('Error loading model: ' + error.message, false);
+            alert('Failed to load AI model.\n\nError: ' + error.message + '\n\nCheck the browser console (F12) for more details.');
+        }
     }
 }
 
@@ -120,6 +176,19 @@ async function initializeCamera() {
         console.error('Error accessing camera:', error);
         updateStatus('Camera access denied', false);
         alert('Please allow camera access to use this app.');
+        return;
+    }
+
+    isCameraReady = true;
+    console.log('✅ Camera initialized successfully!');
+    finalizeInitialization();
+}
+
+function finalizeInitialization() {
+    if (isModelReady && isCameraReady) {
+        updateStatus('Ready to start', true);
+        startBtn.disabled = false;
+        loadingOverlay.classList.add('hidden');
     }
 }
 
@@ -169,9 +238,10 @@ async function processFrame() {
                     ' At the end of your response, write "Confidence: X/10" where X is your confidence level from 1 to 10.';
 
                 // TODO 3d: Send to AI model
+                // Reduced max_new_tokens for faster responses on slow internet
                 const result = await model(blob, {
                     prompt: enhancedInstruction,
-                    max_new_tokens: 120,
+                    max_new_tokens: 80,
                 });
 
                 const fullText = result[0].generated_text;
