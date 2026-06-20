@@ -89,7 +89,9 @@ async function initializeModel() {
             progress_callback: (progress) => {
                 lastProgressTime = Date.now();
                 const status = progress.status;
-                const percent = Math.round((progress.progress || 0) * 100);
+                const rawProgress = progress.progress || 0;
+                const normalizedProgress = rawProgress > 1 ? rawProgress : rawProgress * 100;
+                const percent = Math.min(100, Math.max(0, Math.round(normalizedProgress)));
 
                 if (status === 'downloading' || status === 'progress_total') {
                     if (percent !== lastLoggedPercent || status !== lastStatus) {
