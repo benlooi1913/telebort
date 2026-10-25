@@ -1,0 +1,70 @@
+/* My Superhero Styles */
+
+body {
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+/* TODO 4: Choose your custom typography (Required #7). Set a `font-family` on `body` — either
+   a Google Font stack OR a deliberate web-safe stack (e.g. Georgia, 'Times New Roman', serif for
+   a mysterious/regal hero; a bold sans stack for a powerful one). Note: this preview sandbox
+   blocks external font CDNs (Google Fonts included) — use a web-safe stack. */
+/* Verify: body text renders in your chosen font family, not the browser's plain default. */
+
+/* TODO 5: Build your colour palette (Required #6). Pick at least 3 named/hex colours and apply
+   them consistently across h1, h2.name's border-bottom, and h2.about's border-bottom — they
+   should read as ONE coherent theme (e.g. all warm/heroic, or all cool/mysterious), not random
+   picks. */
+/* Verify: h1, h2.name, and h2.about each show a colour from your palette; at least one of those
+   colours repeats elsewhere on the page (e.g. the link colour). */
+
+h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-top: 30px;
+}
+
+p {
+    color: #666;
+    font-size: 1.1em;
+    margin: 15px 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+}
